@@ -1553,11 +1553,6 @@ const MessageTray = new Lang.Class({
                                       Lang.bind(this, this.toggle));
 
         this._summaryItems = [];
-        // We keep a list of new summary items that were added to the summary since the last
-        // time it was shown to the user. We automatically show the summary to the user if there
-        // are items in this list once the notifications are done showing or once an item gets
-        // added to the summary without a notification being shown.
-        this._newSummaryItems = [];
         this._chatSummaryItemsCount = 0;
     },
 
@@ -1610,18 +1605,6 @@ const MessageTray = new Lang.Class({
 
         this._summaryItems.push(summaryItem);
 
-        // We keep this._newSummaryItems to track any new sources that were added to the
-        // summary and show the summary with them to the user for a short period of time
-        // after notifications are done showing. However, we don't want that to happen for
-        // transient sources, which are removed after the notification is shown, but are
-        // not removed fast enough because of the callbacks to avoid the summary popping up.
-        // So we just don't add transient sources to this._newSummaryItems.
-        // We don't want that to happen for chat sources neither, because they
-        // can be added when the user starts a chat from Empathy and they are not transient.
-        // The notification will popup on incoming message anyway. See bug #657249.
-        if (!source.isTransient && !source.isChat)
-            this._newSummaryItems.push(summaryItem);
-
         source.connect('notify', Lang.bind(this, this._onNotify));
 
         source.connect('muted-changed', Lang.bind(this,
@@ -1658,10 +1641,6 @@ const MessageTray = new Lang.Class({
             return;
 
         let summaryItemToRemove = this._summaryItems[index];
-
-        let newSummaryItemsIndex = this._newSummaryItems.indexOf(this._summaryItems[index]);
-        if (newSummaryItemsIndex != -1)
-            this._newSummaryItems.splice(newSummaryItemsIndex, 1);
 
         this._summaryItems.splice(index, 1);
 
@@ -1978,14 +1957,9 @@ const MessageTray = new Lang.Class({
         let mustHideSummary = (notificationsPending && (notificationUrgent || summaryOptionalInOverview))
                               || notificationsVisible || this._isScreenLocked;
 
-        if (this._summaryState == State.HIDDEN && !mustHideSummary) {
-            if (summarySummoned) {
-                this._showSummary(0);
-            } else if (notificationsDone && !this._busy && !this._inFullscreen) {
-                if (this._newSummaryItems.length > 0)
-                    this._showSummary(SUMMARY_TIMEOUT);
-            }
-        } else if (this._summaryState == State.SHOWN && (!summaryPinned || mustHideSummary))
+        if (this._summaryState == State.HIDDEN && !mustHideSummary && summarySummoned)
+            this._showSummary(0);
+        else if (this._summaryState == State.SHOWN && (!summaryPinned || mustHideSummary))
             this._hideSummary();
 
         // Summary notification
@@ -2298,7 +2272,6 @@ const MessageTray = new Lang.Class({
     },
 
     _showSummary: function(timeout) {
-        this._newSummaryItems = [];
         this._summaryBin.opacity = 0;
         this._summaryBin.y = this.actor.height;
         this._tween(this._summaryBin, '_summaryState', State.SHOWN,
@@ -2313,7 +2286,6 @@ const MessageTray = new Lang.Class({
     },
 
     _showSummaryCompleted: function(timeout) {
-        this._newSummaryItems = [];
         if (timeout != 0) {
             this._summaryTimeoutId =
                 Mainloop.timeout_add(timeout * 1000,
