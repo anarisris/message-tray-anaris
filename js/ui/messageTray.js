@@ -1526,6 +1526,7 @@ const MessageTray = new Lang.Class({
         Main.overview.connect('showing', Lang.bind(this,
             function() {
                 this._overviewVisible = true;
+                this.actor.add_style_pseudo_class('overview');
                 if (this._locked) {
                     this._unsetClickedSummaryItem();
                     this._unlock();
@@ -1536,6 +1537,7 @@ const MessageTray = new Lang.Class({
         Main.overview.connect('hiding', Lang.bind(this,
             function() {
                 this._overviewVisible = false;
+                this.actor.remove_style_pseudo_class('overview');
                 if (this._locked) {
                     this._unsetClickedSummaryItem();
                     this._unlock();
