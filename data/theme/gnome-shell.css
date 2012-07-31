@@ -1174,7 +1174,14 @@ StButton.popup-menu-item:insensitive {
 #message-tray {
     background: #2e3436 url(message-tray-background.png);
     background-repeat: repeat;
+    border-top: 1px solid transparent;
+    transition-duration: 100;
     height: 72px;
+}
+
+#message-tray:overview {
+    background: rgba(0, 0, 0, 0.5);
+    border-top: 1px solid rgba(128, 128, 128, 0.4);
 }
 
 .notification {
