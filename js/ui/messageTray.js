@@ -16,6 +16,7 @@ const St = imports.gi.St;
 const BoxPointer = imports.ui.boxpointer;
 const GnomeSession = imports.misc.gnomeSession;
 const GrabHelper = imports.ui.grabHelper;
+const Lightbox = imports.ui.lightbox;
 const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
 const Params = imports.misc.params;
@@ -1352,6 +1353,13 @@ const MessageTray = new Lang.Class({
         this._inFullscreen = false;
         this._desktopClone = null;
 
+        this._lightbox = new Lightbox.Lightbox(Main.uiGroup,
+                                               { inhibitEvents: true,
+                                                 fadeInTime: ANIMATION_TIME,
+                                                 fadeOutTime: ANIMATION_TIME
+                                               });
+        this._lightbox.highlight(this.actor);
+
         this._corner = new Clutter.Rectangle({ width: 1,
                                                height: 1,
                                                opacity: 0,
@@ -1775,6 +1783,8 @@ const MessageTray = new Lang.Class({
         this._desktopClone.y = 0;
         this._desktopClone.show();
 
+        this._lightbox.show();
+
         Tweener.addTween(this._desktopClone,
                          { y: this._desktopClone.y - this.actor.height,
                            time: ANIMATION_TIME,
@@ -1816,6 +1826,8 @@ const MessageTray = new Lang.Class({
                                                            geometry.height + progress);
                            })
                          });
+
+        this._lightbox.hide();
     },
 
     _hideTray: function() {
