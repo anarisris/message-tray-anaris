@@ -357,7 +357,7 @@ const NotificationDaemon = new Lang.Class({
         let gicon = this._iconForNotificationData(icon, hints);
         let iconActor = new St.Icon({ gicon: gicon,
                                       icon_type: St.IconType.FULLCOLOR,
-                                      icon_size: source.ICON_SIZE });
+                                      icon_size: MessageTray.NOTIFICATION_ICON_SIZE });
 
         if (notification == null) {
             notification = new MessageTray.Notification(source, summary, body,
@@ -557,7 +557,7 @@ const Source = new Lang.Class({
     processNotification: function(notification, gicon) {
         if (gicon)
             this._gicon = gicon;
-        this._setSummaryIcon(this.createIcon(this.ICON_SIZE));
+        this._setSummaryIcon(this.createIcon(this.SOURCE_ICON_SIZE));
 
         let tracker = Shell.WindowTracker.get_default();
         if (notification.resident && this.app && tracker.focus_app == this.app)
@@ -625,7 +625,7 @@ const Source = new Lang.Class({
         // notification-based icons (ie, not a trayicon) or if it was unset before
         if (!this.trayIcon) {
             this.useNotificationIcon = false;
-            this._setSummaryIcon(this.createIcon(this.ICON_SIZE));
+            this._setSummaryIcon(this.createIcon(this.SOURCE_ICON_SIZE));
         }
     },
 
